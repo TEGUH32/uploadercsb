@@ -1,5 +1,5 @@
 // =====================================================
-// UPLOAD BY TEGUH - SIMPLE VERSION
+// UPLOAD API REAL-TIME BY TEGUH
 // =====================================================
 
 export const config = {
@@ -9,13 +9,22 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-    // Set CORS
+    // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
+    }
+
+    if (req.method === 'GET') {
+        // Test endpoint
+        return res.json({ 
+            status: 'online', 
+            message: 'Upload API by Teguh',
+            version: '1.0.0'
+        });
     }
 
     if (req.method !== 'POST') {
@@ -24,19 +33,19 @@ export default async function handler(req, res) {
 
     try {
         // Parse multipart form
-        const form = new Promise((resolve, reject) => {
+        const form = await new Promise((resolve, reject) => {
             const busboy = require('busboy')({ headers: req.headers });
-            const result = { files: [] };
+            const result = {};
             
             busboy.on('file', (fieldname, file, filename, encoding, mimetype) => {
                 const chunks = [];
                 file.on('data', data => chunks.push(data));
                 file.on('end', () => {
-                    result.files.push({
+                    result.file = {
                         filename,
                         mimetype,
                         buffer: Buffer.concat(chunks)
-                    });
+                    };
                 });
             });
             
@@ -45,19 +54,17 @@ export default async function handler(req, res) {
             req.pipe(busboy);
         });
 
-        const { files } = await form;
-        
-        if (!files || files.length === 0) {
+        if (!form.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        const file = files[0];
+        const file = form.file;
         
-        // Generate ID
-        const id = Math.random().toString(36).substring(2, 15);
+        // Generate unique ID
+        const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
         const ext = file.filename.split('.').pop();
         const filename = `${id}.${ext}`;
-
+        
         // Convert to base64
         const base64 = file.buffer.toString('base64');
         const dataUrl = `data:${file.mimetype};base64,${base64}`;
@@ -67,15 +74,28 @@ export default async function handler(req, res) {
             ? `https://${process.env.VERCEL_URL}` 
             : `https://${req.headers.host}`;
 
+        // Store in memory (temporary)
+        // For production, use database or cloud storage
+        if (!global.files) global.files = new Map();
+        global.files.set(filename, {
+            name: file.filename,
+            buffer: file.buffer,
+            type: file.mimetype,
+            size: file.buffer.length,
+            uploaded: new Date().toISOString()
+        });
+
         res.json({
             success: true,
             file: {
+                id: id,
                 name: file.filename,
                 filename: filename,
                 size: file.buffer.length,
                 type: file.mimetype,
                 url: `${baseUrl}/api/file/${filename}`,
-                preview: dataUrl
+                preview: dataUrl,
+                direct: `${baseUrl}/api/file/${filename}`
             }
         });
 
