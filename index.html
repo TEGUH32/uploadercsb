@@ -1,112 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload File by Teguh</title>
+    <title>Upload by Teguh</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: Arial, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f0f2f5;
             min-height: 100vh;
-            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
         
-        .container {
-            max-width: 900px;
-            width: 100%;
+        .card {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             padding: 40px;
-            text-align: center;
+            max-width: 600px;
+            width: 100%;
         }
         
-        .header h1 {
-            font-size: 36px;
+        h1 {
+            color: #333;
             margin-bottom: 10px;
         }
         
-        .header p {
-            opacity: 0.9;
-            font-size: 16px;
+        p {
+            color: #666;
+            margin-bottom: 30px;
         }
         
-        .content {
-            padding: 40px;
-        }
-        
-        .upload-area {
-            border: 2px dashed #ddd;
+        .upload-box {
+            border: 2px dashed #ccc;
             border-radius: 10px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
-        .upload-area:hover {
-            border-color: #667eea;
-            background: #f8f9fa;
+        .upload-box:hover {
+            border-color: #007bff;
         }
         
         .upload-icon {
             font-size: 48px;
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-        
-        .upload-text {
-            color: #666;
             margin-bottom: 10px;
-        }
-        
-        .upload-hint {
-            color: #999;
-            font-size: 14px;
         }
         
         #fileInput {
             display: none;
         }
         
-        .progress {
-            width: 100%;
-            height: 6px;
-            background: #eee;
-            border-radius: 3px;
-            margin: 20px 0;
-            display: none;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
         .result {
             background: #f8f9fa;
             border-left: 4px solid #28a745;
-            padding: 20px;
+            padding: 15px;
             border-radius: 5px;
             margin: 20px 0;
             display: none;
@@ -114,258 +73,71 @@
         }
         
         .result a {
-            color: #667eea;
+            color: #007bff;
             text-decoration: none;
-        }
-        
-        .result a:hover {
-            text-decoration: underline;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 30px 0;
-        }
-        
-        .stat-box {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .stat-label {
-            color: #666;
-            margin-top: 5px;
-            font-size: 14px;
-        }
-        
-        .files-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .file-card {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            transition: transform 0.2s;
-        }
-        
-        .file-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .file-icon {
-            font-size: 32px;
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        .file-name {
-            font-size: 14px;
-            word-break: break-all;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
-        .file-size {
-            color: #999;
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-        
-        .file-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-outline {
-            background: none;
-            border: 1px solid #ddd;
-            color: #666;
         }
         
         .footer {
             text-align: center;
-            padding: 20px;
-            border-top: 1px solid #eee;
+            margin-top: 30px;
             color: #999;
-            font-size: 14px;
-        }
-        
-        .footer a {
-            color: #667eea;
-            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📁 Upload File by Teguh</h1>
-            <p>Simple & Fast File Upload</p>
+    <div class="card">
+        <h1>📁 Upload by Teguh</h1>
+        <p>Simple file upload - Click to upload</p>
+        
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📤</div>
+            <div>Click to upload file</div>
+            <small style="color:#999;">Max 10MB</small>
+            <input type="file" id="fileInput" onchange="uploadFile()">
         </div>
         
-        <div class="content">
-            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                <div class="upload-icon">📤</div>
-                <div class="upload-text">Click to upload or drag & drop</div>
-                <div class="upload-hint">Max file size: 100MB • All files allowed</div>
-                <input type="file" id="fileInput" onchange="uploadFile()">
-            </div>
-            
-            <div class="progress" id="progress">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            
-            <div class="result" id="result"></div>
-            
-            <div class="stats" id="stats">
-                <div class="stat-box">
-                    <div class="stat-value" id="totalFiles">0</div>
-                    <div class="stat-label">Total Files</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="totalSize">0 MB</div>
-                    <div class="stat-label">Total Size</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="serverStatus">Online</div>
-                    <div class="stat-label">Status</div>
-                </div>
-            </div>
-            
-            <h3 style="margin: 20px 0 10px; color: #333;">📋 Recent Uploads</h3>
-            <div class="files-grid" id="files"></div>
-        </div>
+        <div class="result" id="result"></div>
         
         <div class="footer">
-            <p>Upload File by Teguh • <a href="#">Developer</a> • <a href="#">API</a> • <a href="#">Contact</a></p>
-            <p style="margin-top: 10px; font-size: 12px;">© 2026 Teguh Developer</p>
+            © 2026 Teguh Developer
         </div>
     </div>
     
     <script>
         async function uploadFile() {
-            const file = document.getElementById('fileInput').files[0];
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
             if (!file) return;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'none';
             
             const formData = new FormData();
             formData.append('file', file);
             
-            const progress = document.getElementById('progress');
-            const progressBar = document.getElementById('progressBar');
-            const result = document.getElementById('result');
-            
-            progress.style.display = 'block';
-            result.style.display = 'none';
-            
             try {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', '/api/upload', true);
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
                 
-                xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) {
-                        const percent = (e.loaded / e.total) * 100;
-                        progressBar.style.width = percent + '%';
-                    }
-                };
+                const data = await response.json();
                 
-                xhr.onload = () => {
-                    progress.style.display = 'none';
-                    progressBar.style.width = '0%';
-                    
-                    const data = JSON.parse(xhr.responseText);
-                    if (data.success) {
-                        result.style.display = 'block';
-                        result.innerHTML = `
-                            ✅ File uploaded successfully!<br>
-                            <a href="${data.file.url}" target="_blank">${data.file.url}</a><br>
-                            <span style="color:#666; font-size:12px;">${(data.file.size/1024).toFixed(2)} KB</span>
-                        `;
-                    } else {
-                        alert('Upload failed: ' + data.error);
-                    }
-                    
-                    loadFiles();
-                    loadStats();
-                };
-                
-                xhr.send(formData);
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        ✅ Upload success!<br>
+                        <a href="${data.file.url}" target="_blank">${data.file.url}</a><br>
+                        <small>${(data.file.size/1024).toFixed(2)} KB</small>
+                    `;
+                    resultDiv.style.display = 'block';
+                } else {
+                    alert('Error: ' + data.error);
+                }
             } catch (error) {
                 alert('Upload failed');
             }
         }
-        
-        async function loadFiles() {
-            try {
-                const res = await fetch('/api/list');
-                const data = await res.json();
-                
-                const filesEl = document.getElementById('files');
-                filesEl.innerHTML = data.files.slice(0, 6).map(file => `
-                    <div class="file-card">
-                        <div class="file-icon">📄</div>
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${(file.size/1024).toFixed(2)} KB</div>
-                        <div class="file-actions">
-                            <a href="${file.url}" target="_blank" class="btn btn-primary">View</a>
-                            <button class="btn btn-outline" onclick="copyUrl('${file.url}')">Copy</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.log('Error loading files');
-            }
-        }
-        
-        async function loadStats() {
-            try {
-                const res = await fetch('/api/stats');
-                const data = await res.json();
-                
-                document.getElementById('totalFiles').innerText = data.totalFiles;
-                document.getElementById('totalSize').innerText = data.totalSizeFormatted;
-            } catch (error) {
-                console.log('Error loading stats');
-            }
-        }
-        
-        function copyUrl(url) {
-            navigator.clipboard.writeText(url);
-            alert('URL copied!');
-        }
-        
-        // Load initial data
-        loadFiles();
-        loadStats();
     </script>
 </body>
 </html>
