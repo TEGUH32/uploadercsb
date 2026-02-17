@@ -1,30 +1,30 @@
 // =====================================================
-// UPLOAD FILE BY TEGUH - VERCEL VERSION
-// NO FILE SYSTEM - PAKE MEMORY & BASE64
+// UPLOAD BY TEGUH - SIMPLE VERSION
 // =====================================================
 
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
+
 export default async function handler(req, res) {
-    // Set CORS headers
+    // Set CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Handle OPTIONS request (preflight)
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
 
-    // Only allow POST
     if (req.method !== 'POST') {
-        return res.status(405).json({ 
-            success: false, 
-            error: 'Method not allowed' 
-        });
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
     try {
-        // Parse multipart/form-data
-        const formData = await new Promise((resolve, reject) => {
+        // Parse multipart form
+        const form = new Promise((resolve, reject) => {
             const busboy = require('busboy')({ headers: req.headers });
             const result = { files: [] };
             
@@ -33,10 +33,8 @@ export default async function handler(req, res) {
                 file.on('data', data => chunks.push(data));
                 file.on('end', () => {
                     result.files.push({
-                        fieldname,
                         filename,
                         mimetype,
-                        encoding,
                         buffer: Buffer.concat(chunks)
                     });
                 });
@@ -47,48 +45,42 @@ export default async function handler(req, res) {
             req.pipe(busboy);
         });
 
-        if (formData.files.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'No file uploaded' 
-            });
+        const { files } = await form;
+        
+        if (!files || files.length === 0) {
+            return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        const file = formData.files[0];
+        const file = files[0];
         
-        // Generate random filename
+        // Generate ID
+        const id = Math.random().toString(36).substring(2, 15);
         const ext = file.filename.split('.').pop();
-        const randomName = Math.random().toString(36).substring(2, 15) + 
-                          Math.random().toString(36).substring(2, 15) + 
-                          '.' + ext;
+        const filename = `${id}.${ext}`;
 
         // Convert to base64
         const base64 = file.buffer.toString('base64');
         const dataUrl = `data:${file.mimetype};base64,${base64}`;
 
-        // Return data (store in memory, not file system)
+        // Get base URL
         const baseUrl = process.env.VERCEL_URL 
             ? `https://${process.env.VERCEL_URL}` 
-            : `${req.headers['x-forwarded-proto'] || 'http'}://${req.headers.host}`;
+            : `https://${req.headers.host}`;
 
         res.json({
             success: true,
             file: {
                 name: file.filename,
-                filename: randomName,
+                filename: filename,
                 size: file.buffer.length,
                 type: file.mimetype,
-                url: `${baseUrl}/api/file/${randomName}`,
-                // For preview (limited size)
-                preview: file.buffer.length < 5 * 1024 * 1024 ? dataUrl : null
+                url: `${baseUrl}/api/file/${filename}`,
+                preview: dataUrl
             }
         });
 
     } catch (error) {
         console.error('Upload error:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
+        res.status(500).json({ error: error.message });
     }
 }
