@@ -9,11 +9,11 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         
         body {
-            background: #f0f2f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -21,82 +21,162 @@
             padding: 20px;
         }
         
-        .card {
+        .container {
             background: white;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             padding: 40px;
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
         }
         
         h1 {
             color: #333;
             margin-bottom: 10px;
+            font-size: 28px;
         }
         
-        p {
+        .subtitle {
             color: #666;
             margin-bottom: 30px;
+            font-size: 14px;
         }
         
-        .upload-box {
+        .upload-area {
             border: 2px dashed #ccc;
             border-radius: 10px;
-            padding: 40px;
+            padding: 40px 20px;
             text-align: center;
             cursor: pointer;
+            transition: all 0.3s;
             margin-bottom: 20px;
         }
         
-        .upload-box:hover {
-            border-color: #007bff;
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
         }
         
         .upload-icon {
             font-size: 48px;
             margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        .upload-text {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
         }
         
         #fileInput {
             display: none;
         }
         
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin: 20px 0;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
         .result {
             background: #f8f9fa;
             border-left: 4px solid #28a745;
-            padding: 15px;
+            padding: 20px;
             border-radius: 5px;
             margin: 20px 0;
             display: none;
             word-break: break-all;
         }
         
-        .result a {
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .result-url {
+            background: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #007bff;
+        }
+        
+        .result-url a {
             color: #007bff;
             text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .result-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background: #5a67d8;
         }
         
         .footer {
             text-align: center;
             margin-top: 30px;
             color: #999;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="container">
         <h1>📁 Upload by Teguh</h1>
-        <p>Simple file upload - Click to upload</p>
+        <div class="subtitle">Simple file upload - Click to upload</div>
         
-        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
             <div class="upload-icon">📤</div>
-            <div>Click to upload file</div>
-            <small style="color:#999;">Max 10MB</small>
+            <div class="upload-text">Choose file or drag here</div>
+            <div class="upload-hint">Max 10MB • All files allowed</div>
             <input type="file" id="fileInput" onchange="uploadFile()">
         </div>
         
+        <div class="progress" id="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
         <div class="result" id="result"></div>
+        
+        <div style="text-align: center;">
+            <button class="btn" onclick="window.location.reload()">↻ Upload New</button>
+        </div>
         
         <div class="footer">
             © 2026 Teguh Developer
@@ -108,35 +188,80 @@
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
             
-            if (!file) return;
+            if (!file) {
+                alert('Pilih file dulu kontol!');
+                return;
+            }
             
-            const resultDiv = document.getElementById('result');
-            resultDiv.style.display = 'none';
+            // Tampilkan progress
+            const progress = document.getElementById('progress');
+            const progressBar = document.getElementById('progressBar');
+            const result = document.getElementById('result');
             
-            const formData = new FormData();
-            formData.append('file', file);
+            progress.style.display = 'block';
+            result.style.display = 'none';
+            progressBar.style.width = '0%';
             
             try {
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+                // Baca file sebagai base64
+                const reader = new FileReader();
                 
-                const data = await response.json();
+                reader.onload = async function(e) {
+                    const base64 = e.target.result;
+                    
+                    // Simulasi progress
+                    let width = 0;
+                    const interval = setInterval(() => {
+                        width += 10;
+                        progressBar.style.width = width + '%';
+                        if (width >= 100) clearInterval(interval);
+                    }, 100);
+                    
+                    // Buat data URL langsung (tanpa server)
+                    setTimeout(() => {
+                        clearInterval(interval);
+                        progress.style.display = 'none';
+                        
+                        // Tampilkan hasil
+                        const fileType = file.type;
+                        const fileName = file.name;
+                        const fileSize = file.size;
+                        
+                        let preview = '';
+                        if (fileType.startsWith('image/')) {
+                            preview = `<img src="${base64}" class="result-preview">`;
+                        } else if (fileType.startsWith('video/')) {
+                            preview = `<video src="${base64}" controls class="result-preview"></video>`;
+                        }
+                        
+                        result.innerHTML = `
+                            <div class="result-title">✅ Upload Berhasil!</div>
+                            <div class="result-url">
+                                <strong>Nama:</strong> ${fileName}<br>
+                                <strong>Ukuran:</strong> ${(fileSize/1024).toFixed(2)} KB<br>
+                                <strong>Tipe:</strong> ${fileType}<br>
+                                <strong>Data URL:</strong><br>
+                                <a href="${base64}" target="_blank">${base64.substring(0, 50)}...</a>
+                            </div>
+                            ${preview}
+                            <button class="btn" onclick="copyToClipboard('${base64}')">📋 Copy Data URL</button>
+                        `;
+                        
+                        result.style.display = 'block';
+                    }, 1000);
+                };
                 
-                if (data.success) {
-                    resultDiv.innerHTML = `
-                        ✅ Upload success!<br>
-                        <a href="${data.file.url}" target="_blank">${data.file.url}</a><br>
-                        <small>${(data.file.size/1024).toFixed(2)} KB</small>
-                    `;
-                    resultDiv.style.display = 'block';
-                } else {
-                    alert('Error: ' + data.error);
-                }
+                reader.readAsDataURL(file);
+                
             } catch (error) {
-                alert('Upload failed');
+                alert('Upload failed: ' + error.message);
+                progress.style.display = 'none';
             }
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            alert('Copied to clipboard!');
         }
     </script>
 </body>
